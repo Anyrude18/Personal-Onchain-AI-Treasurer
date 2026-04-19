@@ -7,7 +7,7 @@ import { Toaster } from 'react-hot-toast';
 
 import '@rainbow-me/rainbowkit/styles.css';
 import './index.css';
-
+import './index.css'
 import App from './App.jsx';
 import { wagmiConfig } from './wagmiConfig.js';
 

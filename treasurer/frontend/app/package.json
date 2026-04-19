@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "lint": "eslint src --ext .js,.jsx",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.10",

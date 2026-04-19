@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ShieldCheck, Copy, RefreshCw, ExternalLink } from 'lucide-react';
+import { ShieldCheck, Copy, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Badge from '../components/ui/Badge';
 import TokenIcon from '../components/ui/TokenIcon';
@@ -18,9 +18,10 @@ function truncateHash(hash) {
 }
 
 export default function AuditLog() {
-  const { auditLog, isLoading, refetch } = useAudit();
+  const { auditLog = [], isLoading, refetch } = useAudit();
 
   const copyHash = (hash) => {
+    if (!hash || !navigator?.clipboard?.writeText) return;
     navigator.clipboard.writeText(hash);
     toast.success('Tx hash copied!');
   };
@@ -63,44 +64,52 @@ export default function AuditLog() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
-                {auditLog.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-3.5 text-slate-500 text-xs whitespace-nowrap font-mono">
-                      {entry.timestamp}
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-200 text-xs font-medium whitespace-nowrap">
-                      {entry.action}
-                    </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <TokenIcon symbol={entry.protocol.split(' ')[0]} size="sm" />
-                        <span className="text-slate-300 text-xs">{entry.protocol}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs font-medium whitespace-nowrap">
-                      <span className={entry.amount.startsWith('+') ? 'text-[#00c896]' : entry.amount.startsWith('-') ? 'text-[#e05252]' : 'text-slate-200'}>
-                        {entry.amount}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-slate-400 whitespace-nowrap">
-                      {entry.initiatedBy}
-                    </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
-                      <Badge label={entry.status} variant={statusVariant[entry.status] || 'default'} size="sm" />
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-slate-400 whitespace-nowrap">
-                      {entry.gasUsed} HBAR
-                    </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-500 text-xs font-mono">{truncateHash(entry.txHash)}</span>
-                        <button onClick={() => copyHash(entry.txHash)} className="text-slate-600 hover:text-slate-300 transition-colors">
-                          <Copy size={12} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {auditLog.map((entry) => {
+                  const protocolSymbol = (entry.protocol || '').split(' ')[0];
+                  const amountText = String(entry.amount ?? '');
+                  const amountClass = amountText.startsWith('+')
+                    ? 'text-[#00c896]'
+                    : amountText.startsWith('-')
+                    ? 'text-[#e05252]'
+                    : 'text-slate-200';
+
+                  return (
+                    <tr key={entry.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="px-4 py-3.5 text-slate-500 text-xs whitespace-nowrap font-mono">
+                        {entry.timestamp}
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-200 text-xs font-medium whitespace-nowrap">
+                        {entry.action}
+                      </td>
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <TokenIcon symbol={protocolSymbol} size="sm" />
+                          <span className="text-slate-300 text-xs">{entry.protocol}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-xs font-medium whitespace-nowrap">
+                        <span className={amountClass}>{amountText}</span>
+                      </td>
+                      <td className="px-4 py-3.5 text-xs text-slate-400 whitespace-nowrap">
+                        {entry.initiatedBy}
+                      </td>
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <Badge label={entry.status} variant={statusVariant[entry.status] || 'default'} size="sm" />
+                      </td>
+                      <td className="px-4 py-3.5 text-xs text-slate-400 whitespace-nowrap">
+                        {entry.gasUsed} HBAR
+                      </td>
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500 text-xs font-mono">{truncateHash(entry.txHash)}</span>
+                          <button onClick={() => copyHash(entry.txHash)} className="text-slate-600 hover:text-slate-300 transition-colors">
+                            <Copy size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
